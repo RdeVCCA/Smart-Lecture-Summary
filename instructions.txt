@@ -8,6 +8,7 @@ https://www.figma.com/file/znetR0WTlGudg21gdscC6b/Smart-Lecture-Summary?type=des
 
 Documentations and tutorials:
 Flask: https://flask.palletsprojects.com/en/2.3.x/
+Flask Tutorial: https://youtu.be/Z1RJmh_OqeA?t=378 
 Vercel: https://vercel.com/
 FFMPEG: https://github.com/Kagami/ffmpeg.js/
 SpeechRecognition: https://pypi.org/project/SpeechRecognition/
