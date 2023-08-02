@@ -1,0 +1,15 @@
+# This file contains the useful links for member to refer to:
+
+Project Proposal:
+https://docs.google.com/document/d/1gSvmtTxxyFH2c1qAm2gFIUtR-AIlakCV_fMhshF531k/edit?usp=sharing
+
+Figma Design File:
+
+Documentations and tutorials:
+Flask: https://flask.palletsprojects.com/en/2.3.x/
+Vercel: https://vercel.com/
+FFMPEG: https://github.com/Kagami/ffmpeg.js/
+SpeechRecognition: https://pypi.org/project/SpeechRecognition/
+ChatGPT: 
+
+API Keys:
