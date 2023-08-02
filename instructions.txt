@@ -4,6 +4,7 @@ Project Proposal:
 https://docs.google.com/document/d/1gSvmtTxxyFH2c1qAm2gFIUtR-AIlakCV_fMhshF531k/edit?usp=sharing
 
 Figma Design File:
+https://www.figma.com/file/znetR0WTlGudg21gdscC6b/Smart-Lecture-Summary?type=design&mode=design&t=aV9sUYSj9VecXc8C-1
 
 Documentations and tutorials:
 Flask: https://flask.palletsprojects.com/en/2.3.x/
