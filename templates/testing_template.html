@@ -11,6 +11,10 @@
     <h2>Welcome to FlaskApp!</h2>
     <p>{{ key_status }}</p>
 
+    <input id ="audio" type="file" onchange="upload()">
+    <p id="message"></p>
+    <button onclick="listing()">List</button>
+
     <script src="{{ url_for('static', filename='js/testing.js') }}"></script>
 </body>
 </html>

@@ -14,4 +14,3 @@ FFMPEG: https://github.com/Kagami/ffmpeg.js/
 SpeechRecognition: https://pypi.org/project/SpeechRecognition/
 ChatGPT: 
 
-API Keys:

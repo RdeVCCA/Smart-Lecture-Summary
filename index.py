@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import requests
 import os
 
@@ -22,6 +22,31 @@ if gpt:
     keys = {"chatgpt":gpt}
 else:
     keys = {"chatgpt":os.getenv('CHAT_GPT')}
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return "No file part", 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return "No selected file", 400
+    
+    root_directory = os.path.abspath(os.getcwd())
+    upload_directory = os.path.join(root_directory,'tmp')
+    print(upload_directory)
+    os.makedirs(upload_directory, exist_ok=True)
+    file.save(os.path.join(upload_directory, file.filename))
+
+    return "File saved to: " + os.path.abspath(os.path.join(upload_directory, file.filename)) + "\n" + str(os.listdir(upload_directory))
+
+@app.route("/list-files", methods=["POST"])
+def list_file():
+    root_directory = os.path.abspath(os.getcwd())
+    upload_directory = os.path.join(root_directory,'tmp')
+    os.makedirs(upload_directory, exist_ok=True)
+    return str(os.listdir(upload_directory))
 
 @app.route("/")
 def hello_world():
