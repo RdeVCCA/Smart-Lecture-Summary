@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import requests
+import tempfile
 import os
 
 def is_api_key_valid(api_key):
@@ -32,22 +33,18 @@ def upload_file():
 
     if file.filename == '':
         return "No selected file", 400
-    
-    root_directory = os.path.abspath(os.getcwd())
-    upload_directory = os.path.join(root_directory,'tmp')
-    print(upload_directory)
-    os.makedirs(upload_directory, exist_ok=True)
-    file.save(os.path.join(upload_directory, file.filename))
 
-    return "File saved to: " + os.path.abspath(os.path.join(upload_directory, file.filename)) + "\n" + str(os.listdir(upload_directory))
+    temp_dir = tempfile.mkdtemp()
+    file_path = os.path.join(temp_dir, file.filename)
+    file.save(file_path)
+    listing = str(os.listdir(temp_dir))
 
-@app.route("/list-files", methods=["POST"])
-def list_file():
-    root_directory = os.path.abspath(os.getcwd())
-    upload_directory = os.path.join(root_directory,'tmp')
-    os.makedirs(upload_directory, exist_ok=True)
-    return str(os.listdir(upload_directory))
+    # Process the file (you can perform additional operations here)
 
+    os.remove(file_path)
+    os.rmdir(temp_dir)
+
+    return "File saved to: " + os.path.abspath(os.path.join(file_path, file.filename)) + "\n" + listing
 @app.route("/")
 def hello_world():
     return render_template('testing_template.html', key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])))
