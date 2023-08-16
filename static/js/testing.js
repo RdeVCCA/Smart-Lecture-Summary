@@ -1,3 +1,11 @@
+function convert(file){
+    return file
+}
+
+function getsize(file){
+    return "size"
+}
+
 function upload(){
     const fileInput = document.getElementById("audio");
     const file = fileInput.files[0];
@@ -5,7 +13,7 @@ function upload(){
     if (file) {
         // Create a FormData object and append the file
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", convert(file));
 
         // Send the file using a fetch POST request
         fetch("/upload", {
