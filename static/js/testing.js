@@ -48,6 +48,7 @@ async function upload(){
         // Create a FormData object and append the file
         const formData = new FormData();
         await formData.append("file", convert(file));
+        getsize(file);
 
         // Send the file using a fetch POST request
         fetch("/upload", {
