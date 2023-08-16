@@ -18,8 +18,11 @@ def is_api_key_valid(api_key: str) -> bool:
     return response.status_code == 200
 
 app = Flask(__name__)
-gpt = os.environ.get('CHAT_GPT') or ""
-keys = {"chatgpt": gpt}
+gpt = os.environ.get('CHAT_GPT')
+if gpt:
+    keys = {"chatgpt":gpt}
+else:
+    keys = {"chatgpt":os.getenv('CHAT_GPT')}
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
