@@ -3,7 +3,7 @@ import requests
 import tempfile
 import os
 
-def is_api_key_valid(api_key):
+def is_api_key_valid(api_key: str) -> bool:
     url = "https://api.openai.com/v1/engines/davinci/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -18,11 +18,8 @@ def is_api_key_valid(api_key):
     return response.status_code == 200
 
 app = Flask(__name__)
-gpt = os.environ.get('CHAT_GPT')
-if gpt:
-    keys = {"chatgpt":gpt}
-else:
-    keys = {"chatgpt":os.getenv('CHAT_GPT')}
+gpt = os.environ.get('CHAT_GPT') or ""
+keys = {"chatgpt": gpt}
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -39,15 +36,14 @@ def upload_file():
     file.save(file_path)
     listing = str(os.listdir(temp_dir))
 
-    # Process the file (you can perform additional operations here)
-
     os.remove(file_path)
     os.rmdir(temp_dir)
 
     return "File saved to: " + os.path.abspath(os.path.join(file_path, file.filename)) + "\n" + listing
+
 @app.route("/")
 def hello_world():
     return render_template('testing_template.html', key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",port=8888,debug=True)
+    app.run(host="0.0.0.0", port=8888, debug=True)
