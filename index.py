@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import requests
 import tempfile
 import os
@@ -23,6 +23,10 @@ if gpt:
     keys = {"chatgpt":gpt}
 else:
     keys = {"chatgpt":os.getenv('CHAT_GPT')}
+
+@app.route('/static/js/<filename>')
+def serve_js(filename):
+    return send_from_directory('static/js', filename, mimetype='text/javascript')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

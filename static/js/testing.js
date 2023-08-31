@@ -1,29 +1,21 @@
+var worker = new Worker("static/js/worker.js");
+const outputElement = document.getElementById("output");
+worker.onmessage = function (event) {
+  var message = event.data;
+  if (message.type == "ready") {
+    outputElement.textContent = "Loaded";
+    worker.postMessage({
+      type: 'command',
+      arguments: ['-help']
+    })
+  } else if (message.type == "stdout") {
+    outputElement.textContent += message.data + "\n";
+  } else if (message.type == "start") {
+    outputElement.textContent = "Worker has received command\n";
+  }
+};
+
 async function convert(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = function(event) {
-            const data = new Uint8Array(event.target.result);
-
-            FFmpeg({
-                arguments: ['-i', 'input.mp4', '-q:a', '0', '-map', 'a', 'output.wav'],
-                files: [
-                    {
-                        data: data,
-                        name: 'input.mp4'
-                    }
-                ]
-            }).then(result => {
-                const audioData = new Blob([result[0].data], { type: 'audio/wav' });
-                resolve(audioData);
-                return audioData;
-            }).catch(reject);
-        };
-
-        reader.onerror = reject;
-
-        reader.readAsArrayBuffer(file);
-    });
 }
 
 function getsize(file){
