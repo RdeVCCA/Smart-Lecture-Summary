@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_from_directory
 import requests
 import tempfile
 import os
+import database
 
 def is_api_key_valid(api_key: str) -> bool:
     url = "https://api.openai.com/v1/engines/davinci/completions"
@@ -50,7 +51,11 @@ def upload_file():
 
 @app.route("/")
 def hello_world():
-    return render_template('testing_template.html', key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])))
+    return render_template('testing_template.html',
+                        key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])),
+                        db_status = (lambda x: "Database Online" if x=="success" else "Database Offline")(database.query("", "test")["status"]),
+                        test_query = database.query("", "test")["content"]
+                        )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8888, debug=True)

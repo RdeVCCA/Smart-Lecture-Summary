@@ -9,10 +9,11 @@
     <h1>Hello World!</h1>
     <h2>Welcome to FlaskApp!</h2>
     <p>{{ key_status }}</p>
+    <p>{{ db_status }}</p>
 
     <input id="audio" type="file" onchange="upload()">
     <p id="output">Loading...</p>
-    <p id="message"></p>
+    <p class="message">{{ test_query }}</p>
 
     <script src="{{ url_for('static', filename='js/testing.js') }}"></script>
     
