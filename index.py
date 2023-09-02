@@ -3,6 +3,7 @@ import requests
 import tempfile
 import os
 import database
+import json
 
 def is_api_key_valid(api_key: str) -> bool:
     url = "https://api.openai.com/v1/engines/davinci/completions"
@@ -48,6 +49,14 @@ def upload_file():
     os.rmdir(temp_dir)
 
     return "File saved to: " + os.path.abspath(os.path.join(file_path, file.filename)) + "\n" + listing
+
+@app.route('/query')
+def proxy_query():
+    query = request.args.get('query')
+    type = request.args.get('type')
+    result = database.query(query, type)
+    print(result)
+    return json.dumps(result)
 
 @app.route("/")
 def hello_world():
