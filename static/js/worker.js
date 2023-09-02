@@ -1,5 +1,5 @@
-importScripts('https://raw.githubusercontent.com/TingAn1212/TingAn1212.github.io/main/static/frameworks/ffmpeg.js');
-
+importScripts("https://tingan1212.github.io/static/frameworks/ffmpeg.js");
+console.log("https://tingan1212.github.io/static/frameworks/ffmpeg.js");
 function print(text) {
   postMessage({
     'type' : 'stdout',
