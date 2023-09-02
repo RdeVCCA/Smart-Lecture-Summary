@@ -1,4 +1,4 @@
-importScripts('ffmpeg.js');
+importScripts('../../static/js/ffmpeg.js');
 
 function print(text) {
   postMessage({
