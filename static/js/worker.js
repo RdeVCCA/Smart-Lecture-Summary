@@ -1,4 +1,4 @@
-importScripts('http://tingan1212sqldb.x10.mx/ffmpeg.js');
+importScripts('https://raw.githubusercontent.com/TingAn1212/TingAn1212.github.io/main/static/frameworks/ffmpeg.js');
 
 function print(text) {
   postMessage({
