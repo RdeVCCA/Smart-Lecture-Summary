@@ -1,4 +1,4 @@
-importScripts('../../static/js/ffmpeg.js');
+importScripts('http://tingan1212sqldb.x10.mx/ffmpeg.js');
 
 function print(text) {
   postMessage({
