@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Lecture Summary</title>
+    <style>
+@font-face {
+  font-family: 'Outfit';
+  src: url('static/Fonts/Outfit/Outfit-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+body{
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(180deg, #EFEDED 0%, rgba(162, 210, 226, 0.75) 10%, rgba(135, 192, 202, 0.67) 18%, rgba(108, 168, 223, 0.59) 42%, rgba(90, 164, 174, 0.50) 61%, rgba(80, 146, 150, 0.42) 81%, rgba(16, 139, 150, 0.33) 100%);
+        width: 100vw;
+        }
+        .top_container{
+            display:grid;
+            grid-template-areas: 
+            "logos logos"
+            "title placeholder"
+            "description placeholder"
+			"buttons placeholder";
+            width: 100vw;
+        }
+        .top_logos{
+            grid-area: logos;
+            align-items: center;
+            display: flex;
+            gap: 1rem;
+        }
+        .title{
+            grid-area: title;
+        }
+        .slogan{
+            grid-area: description;
+        }
+        .loginsignupbuttons{
+            display: flex;
+            gap: 10rem;
+            grid-area: buttons;
+        }
+        .placeholder_top{
+            grid-area: placeholder;
+            margin-top: 1rem;
+        }
+        .usercreatebuttons{
+            display: flex;
+            gap: 2rem;
+            width:fit-content; background: #4994C4; border-radius: 20px;
+            padding-left: 5rem;
+            padding-top: 0.3rem;
+            padding-bottom: 0.3rem;
+            padding-right: 5rem;
+            align-items: center;
+            position: fixed;
+            right: -1.5rem;
+        
+        }
+    </style>
+</head>
+<body>
+    <div class="usercreatebuttons">
+        <div style="color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">My Projects</div>
+        <div style="color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">Browse<br/></div>
+        <div style="color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">Create New</div>
+        <img style="width: 118px; height: 87px;   " src="static/Images/RdeV logo 1.png" />
+        <img style="width: 115px; height: 115px;    border-radius: 90px" src="static/Images/image 1.png" />
+    </div>
+<div class="top_container">
+    <div class="top_logos">
+        <img style="width: 107.89px; height: 116.19px;" src="static/Images/Dino_website 1.png" />
+        <img style="width: 118px; height: 87px;" src="static/Images/RdeV logo 1.png" />
+    </div>
+    <h1 class="title"><span style="color: #006D87; font-size: 64px; font-family: Outfit; font-weight: 400; word-wrap: break-word">Introducing<br/></span><span style="color: #007175; font-size: 70px; font-family: Outfit; font-weight: 400; word-wrap: break-word">SMART LECTURE SUMMARY </span></h1>
+    <h2 class="slogan" style="color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">some slogan thing<br/>idk what<br/>but eh</h2>
+    <img class="placeholder_top" style="width: 790px; height: 445px;    border-radius: 20px" src="static/Images/Rectangle 4.png" />
+<div class="loginsignupbuttons">
+        <button style="width: 320px; height: 98px; background: linear-gradient(90deg, #007175 0%, rgba(217, 217, 217, 0.48) 100%, rgba(217, 217, 217, 0.10) 100%); border-radius: 30px; border: none; color: #FFE0E0; font-size: 50px; font-family: Outfit; font-weight: 400; word-wrap: break-word">
+            Log In
+        </button>
+        <button style="width: 320px; height: 98px; background: linear-gradient(90deg, #4182A4 0%, rgba(217, 217, 217, 0.10) 100%); border-radius: 30px; border: none; color: #FFE0E0; font-size: 50px; font-family: Outfit; font-weight: 400; word-wrap: break-word">
+            Sign Up
+        </button>
+    </div>
+    </div>
+
+        <div style="width: 2160px; height: 3px;    background: linear-gradient(90deg, white 0%, rgba(104, 106, 103, 0.80) 20%, rgba(69, 73, 61, 0.48) 52%, rgba(104, 106, 103, 0.20) 80%, rgba(119, 170, 119, 0.72) 100%)"></div>
+        <div style="width: 627px; height: 279px;    color: #FFEFEF; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">Summarise your lectures from any device, as long as you have a file!<br/><br/>(Smart Lecture Summary supports: file formats)</div>
+        <div style="width: 320px; height: 139px;   ">
+            <div style="width: 320px; height: 98px;    background: linear-gradient(90deg, #007175 0%, rgba(217, 217, 217, 0) 100%, rgba(217, 217, 217, 0.22) 100%); border-radius: 30px"></div>
+            <div style="   color: #FFE0E0; font-size: 50px; font-family: Outfit; font-weight: 400; word-wrap: break-word">Tutorial<br/></div>
+              </div>      
+        <div style="width: 628px; height: 366px;    background: #D9D9D9; border-radius: 20px"></div>
+        <div style="width: 727px; height: 375px;    background: #FED5D5; border-radius: 30px"></div>
+        <div style="width: 901px; height: 586px;    background: #D9D9D9; border-radius: 20px"></div>
+        <div style="width: 786px; height: 457px;    color: #87C0CA; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">Upload a file, obtain the summarised lecture content, all in a matter of (estimated time).</div>
+        <div style="width: 719px; height: 154px;    color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">could be gif of maybe process of upload</div>
+        <div style="width: 901px; height: 586px;    background: #D9D9D9; border-radius: 20px"></div>
+        <div style="width: 786px; height: 457px;    color: #87C0CA; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">stuff maybe<br/></div>
+        <div style="width: 719px; height: 154px;    color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">idk tbh</div>
+        <div style="width: 295px; height: 768px;    background: #D9D9D9"></div>
+        <div style="width: 295px; height: 768px;    background: #D9D9D9"></div>
+        <div style="width: 1385px; height: 768px;    background: #D9D9D9"></div>
+        <div style="width: 7px; height: 7px;    background: #D9D9D9; border-radius: 9999px"></div>
+        <div style="width: 7px; height: 7px;    background: #D9D9D9; border-radius: 9999px"></div>
+        <div style="width: 7px; height: 7px;    background: #D9D9D9; border-radius: 9999px"></div>
+        <div style="width: 7px; height: 7px;    background: #D9D9D9; border-radius: 9999px"></div>
+        <div style="width: 7px; height: 7px;    background: #D9D9D9; border-radius: 9999px"></div>
+        <div style="width: 175px; height: 571px;    color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">tbd    maybe some reviews from students idk</div>
+        <div style="width: 1069px; height: 430px;    background: #D9D9D9"></div>
+        <div style="width: 892px; height: 427px;    color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">pic of happy student using this website<br/></div>
+        <div style="width: 220px; height: 572px;    color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">idk</div>
+        <img style="width: 133px; height: 120px;   " src="https://via.placeholder.com/133x120" />
+        <div style="width: 787px; height: 163px;    color: white; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">Project created by the SAIS team from </div>
+        <div style="   color: white; font-size: 20px; font-family: Outfit; font-weight: 400; word-wrap: break-word">In collaboration with Peerview (peerview.x10.mx)</div>
+        <div style="width: 357px; height: 119px;    color: #12264F; font-size: 40px; font-family: Outfit; font-weight: 400; word-wrap: break-word">rdevcca@gmail.com<br/></div>
+    </script>
+</body>
+</html>
