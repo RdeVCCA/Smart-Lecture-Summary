@@ -1,0 +1,52 @@
+@font-face {
+    font-family: 'Outfit';
+    src: url('static/Fonts/Outfit/Outfit-VariableFont_wght.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.body {
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(180deg, #EFEDED 0%, rgba(162, 210, 226, 0.75) 10%, rgba(135, 192, 202, 0.67) 18%, rgba(108, 168, 223, 0.59) 42%, rgba(90, 164, 174, 0.50) 61%, rgba(80, 146, 150, 0.42) 81%, rgba(16, 139, 150, 0.33) 100%);
+    width: 100vw;
+}
+
+.usercreatebuttons {
+    display: flex;
+    gap: 2rem;
+    width: fit-content; 
+    background: #4994C4; 
+    border-radius: 20px;
+    padding-left: 5rem;
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+    padding-right: 5rem;
+    align-items: center;
+    position: absolute;
+    right: -1.5rem;
+    top: 1rem;
+}
+
+.section-head {
+    padding-left: 0.2rem;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.ffmpeg-output {
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+    font-size: 15px;
+}
+
+.outputbox {
+    padding-top: 0.1rem;
+}
+
+h1 {
+    font-size: 60px;
+}
+
+.audio-upload {
+    padding-bottom: 0rem;
+}
