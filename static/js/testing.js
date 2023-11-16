@@ -18,6 +18,44 @@ worker.onmessage = function (event) {
 };
 
 async function convert(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            const videoData = new Uint8Array(event.target.result);
+
+            // sends data to the worker with FFmpeg commands
+            postToWorker(videoData, file.name, resolve, reject);
+        };
+
+        reader.onerror = function (error) {
+            reject(error);
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function postToWorker(videoData, filename, resolve, reject) {
+    // Sending a command to convert video to audio (e.g., mp4 to mp3)
+    worker.postMessage({
+        type: 'command',
+        arguments: ['-i', filename, '-vn', '-ar', '44100', '-ac', '2', '-ab', '192k', '-f', 'mp3', 'output.mp3'],
+        files: [{name: filename, data: videoData}]
+    });
+
+    // Handle messages from the worker
+    worker.onmessage = function (event) {
+        var message = event.data;
+
+        if (message.type === "done") {
+            // The conversion is complete
+            const audioData = message.data[0].data; // This is your audio file data
+            resolve(new Blob([audioData], {type: 'audio/mp3'}));
+        } else if (message.type === "error") {
+            reject(message.data);
+        }
+    };
 }
 
 function getsize(file){
@@ -34,37 +72,84 @@ function getsize(file){
     }
 }
 
-async function upload(){
-    const fileInput = document.getElementById("audio");
+// async function upload() {
+//     // const fileInput = document.getElementById("audio");
+//     const fileInput = document.getElementById("audio-upload");
+//     const file = fileInput.files[0];
+
+//     if (file) {
+//         try {
+//             const audioBlob = await convert(file);
+
+//             const formData = new FormData();
+//             formData.append("file", audioBlob, "output.mp3");
+
+//             fetch("/upload", {
+//                 method: "POST",
+//                 body: formData
+//             })
+//             .then(response => response.text())
+//             .then(result => {
+//                 message(result);
+//             })
+//             .catch(error => {
+//                 message("Error uploading file:" + error);
+//             });
+//         } catch (error) {
+//             message("Error converting file:" + error);
+//         }
+//     } else {
+//         message("No file selected.");
+//     }
+// }
+
+// function message(msg){
+//     const item = document.getElementById("warning");
+//     item.textContent = msg;
+// }
+
+async function upload() {
+    const fileInput = document.getElementById("audio-upload");
     const file = fileInput.files[0];
+    const fileNameDisplay = document.getElementById("file-name");
 
     if (file) {
-        // Create a FormData object and append the file
-        const formData = new FormData();
-        await formData.append("file", convert(file));
-        getsize(file);
+        // display file name next to upload button
+        fileNameDisplay.textContent = file.name;
 
-        // Send the file using a fetch POST request
-        fetch("/upload", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.text())
-        .then(result => {
-            message(result);
-        })
-        .catch(error => {
-            message("Error uploading file:" + error);
-        });
+        try {
+            const audioBlob = await convert(file);
+
+            const formData = new FormData();
+            formData.append("file", audioBlob, "output.mp3");
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(result => {
+                message(result);
+            })
+            .catch(error => {
+                message("Error uploading file:" + error);
+            });
+        } catch (error) {
+            message("Error converting file:" + error);
+        }
     } else {
+        fileNameDisplay.textContent = "";
         message("No file selected.");
     }
 }
 
 function message(msg){
     const item = document.getElementById("warning");
-    item.textContent = msg;
+    if(item) {
+        item.textContent = msg;
+    }
 }
+
 
 function listing(){
     fetch("/list-files", {
@@ -101,3 +186,8 @@ async function query(){
         return { error: "An error occurred" };
     }
 }
+
+// debugging
+console.log(outputElement); // Check if this is null
+console.log(statusElement); // Check if this is null
+console.log(fileInput); // Check if this is null
