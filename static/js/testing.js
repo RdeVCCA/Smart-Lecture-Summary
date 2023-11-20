@@ -1,34 +1,43 @@
 var worker = new Worker("static/js/worker.js");
 const outputElement = document.getElementById("ffmpeg-output");
 const statusElement = document.getElementById("ffmpeg-status");
-worker.onmessage = function (event) {
-  var message = event.data;
-  if (message.type == "ready") {
-    outputElement.textContent = "Loaded";
-    worker.postMessage({
-      type: 'command',
-      arguments: ['-help']
-    })
-  } else if (message.type == "stdout") {
-    outputElement.textContent += message.data + "\n";
-  } else if (message.type == "start") {
-    outputElement.textContent = "Worker has received command\n";
-    statusElement.textContent = "ffmpeg online";
-  }
-};
+const fileNameDisplay = document.getElementById("file-name");
+const conversionStatus = document.getElementById("conversion-status");
 
-async function convert(file) {
+worker.onmessage = function (event) {
+    var message = event.data;
+    switch (message.type) {
+      case "ready":
+        statusElement.textContent = "FFmpeg is ready";
+        break;
+      case "stdout":
+      case "stderr":
+        
+        outputElement.textContent += message.data + "\n";
+        break;
+      case "start":
+        statusElement.textContent = "Processing...";
+        outputElement.textContent = "";
+        break;
+      case "done":
+        statusElement.textContent = "Processing completed";
+        break;
+    }
+  };
+
+  async function convert(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
         reader.onload = function (event) {
             const videoData = new Uint8Array(event.target.result);
+            console.log("FileReader loaded the file, size:", videoData.length);
 
-            // sends data to the worker with FFmpeg commands
             postToWorker(videoData, file.name, resolve, reject);
         };
 
         reader.onerror = function (error) {
+            console.error("FileReader error:", error);
             reject(error);
         };
 
@@ -36,12 +45,47 @@ async function convert(file) {
     });
 }
 
+// add back once download feature is removed
+// function postToWorker(videoData, filename, resolve, reject) {
+//     // Send a command to the worker to convert video to audio
+//     worker.postMessage({
+//         type: 'command',
+//         arguments: ['-i', filename, '-vn', '-ar', '44100', '-ac', '2', '-ab', '192k', '-f', 'mp3', 'output.mp3'],
+//         files: [{ name: filename, data: videoData }]
+//     });
+
+//     // Handle messages from the worker
+//     worker.onmessage = function (event) {
+//         var message = event.data;
+
+//         if (message.type === "done") {
+//             // conversion is complete
+//             const audioData = message.data[0].data; // Audio file data
+//             const conversionStatus = document.getElementById("conversion-status");
+//             if (conversionStatus) {
+//                 conversionStatus.textContent = "Conversion successful!";
+//             }
+//             resolve(new Blob([audioData], { type: 'audio/mp3' }));
+//         } else if (message.type === "error") {
+//             // Handle error
+//             const conversionStatus = document.getElementById("conversion-status");
+//             if (conversionStatus) {
+//                 conversionStatus.textContent = "Error during conversion.";
+//             }
+//             reject(message.data);
+//         }
+//     };
+// }
+
+
+//remove once not needed
 function postToWorker(videoData, filename, resolve, reject) {
-    // Sending a command to convert video to audio (e.g., mp4 to mp3)
+    // Send a command to the worker to convert video to audio
+    console.log("Sending data to worker, filename:", filename, "data size:", videoData.length);
     worker.postMessage({
         type: 'command',
         arguments: ['-i', filename, '-vn', '-ar', '44100', '-ac', '2', '-ab', '192k', '-f', 'mp3', 'output.mp3'],
-        files: [{name: filename, data: videoData}]
+        files: [{ name: filename, data: videoData }]
     });
 
     // Handle messages from the worker
@@ -49,14 +93,53 @@ function postToWorker(videoData, filename, resolve, reject) {
         var message = event.data;
 
         if (message.type === "done") {
-            // The conversion is complete
-            const audioData = message.data[0].data; // This is your audio file data
-            resolve(new Blob([audioData], {type: 'audio/mp3'}));
+            // Conversion is complete
+            console.log("Worker finished processing, message:", message);
+            const audioData = message.data[0].data;
+
+            if (!audioData || audioData.length === 0) {
+                console.error("No audio data received from the worker");
+                reject(new Error("No audio data received from the worker"));
+                return;
+            }
+
+            const audioBlob = new Blob([audioData], { type: 'audio/mp3' });
+
+            // Trigger file download
+            downloadConvertedFile(audioBlob, 'converted_audio.mp3');
+
+            // Update conversion status on the page
+            if (conversionStatus) {
+                conversionStatus.textContent = "Conversion successful!";
+            }
+
+            resolve(audioBlob);
         } else if (message.type === "error") {
+            // Handle error
+            if (conversionStatus) {
+                conversionStatus.textContent = "Error during conversion.";
+            }
+            console.error("Worker error:", message.data);
             reject(message.data);
         }
     };
 }
+// remove once not needed
+function downloadConvertedFile(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+
+    a.click();
+
+    setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 100);
+}
+
 
 function getsize(file){
     const sizeInBytes = file.size;
@@ -188,6 +271,6 @@ async function query(){
 }
 
 // debugging
-console.log(outputElement); // Check if this is null
-console.log(statusElement); // Check if this is null
-console.log(fileInput); // Check if this is null
+console.log(outputElement);
+console.log(statusElement);
+console.log(fileInput);
