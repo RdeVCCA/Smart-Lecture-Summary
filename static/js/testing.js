@@ -25,9 +25,9 @@ worker.onmessage = function (event) {
     }
   };
 
-  async function convert(file) {
+async function convert(file) {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+        const reader = new FileReader(); // Create a FileReader object
 
         reader.onload = function (event) {
             const videoData = new Uint8Array(event.target.result);
@@ -45,7 +45,7 @@ worker.onmessage = function (event) {
     });
 }
 
-// add back once download feature is removed
+// add back once download feature is removed Post data into backend
 // function postToWorker(videoData, filename, resolve, reject) {
 //     // Send a command to the worker to convert video to audio
 //     worker.postMessage({
@@ -78,20 +78,23 @@ worker.onmessage = function (event) {
 // }
 
 
-//remove once not needed
+//remove once not needed, this confirm and open up a download
 function postToWorker(videoData, filename, resolve, reject) {
     // Send a command to the worker to convert video to audio
+    console.log("Video data:", videoData);
     console.log("Sending data to worker, filename:", filename, "data size:", videoData.length);
     worker.postMessage({
         type: 'command',
-        arguments: ['-i', filename, '-vn', '-ar', '44100', '-ac', '2', '-ab', '192k', '-f', 'mp3', 'output.mp3'],
+        arguments: ['-i', filename, '-vn', '-ar', '44100', '-ac', '2', '-f', 'wav', 'output.wav'],
         files: [{ name: filename, data: videoData }]
     });
 
     // Handle messages from the worker
     worker.onmessage = function (event) {
         var message = event.data;
-
+        if (message.type === "stdout") {
+            log(message.data);
+        }
         if (message.type === "done") {
             // Conversion is complete
             console.log("Worker finished processing, message:", message);
@@ -103,10 +106,10 @@ function postToWorker(videoData, filename, resolve, reject) {
                 return;
             }
 
-            const audioBlob = new Blob([audioData], { type: 'audio/mp3' });
+            const audioBlob = new Blob([audioData], { type: 'audio/wav' });
 
             // Trigger file download
-            downloadConvertedFile(audioBlob, 'converted_audio.mp3');
+            downloadConvertedFile(audioBlob, 'converted_audio.wav');
 
             // Update conversion status on the page
             if (conversionStatus) {
@@ -191,37 +194,42 @@ function getsize(file){
 //     item.textContent = msg;
 // }
 
+function log(text){
+    const ele = document.getElementById("ffmpeg-output");
+    ele.innerHTML += text + "<br>";
+}
+
 async function upload() {
-    const fileInput = document.getElementById("audio-upload");
+    const fileInput = document.getElementById("audio");
     const file = fileInput.files[0];
-    const fileNameDisplay = document.getElementById("file-name");
+    // const fileNameDisplay = document.getElementById("file-name");
 
     if (file) {
         // display file name next to upload button
-        fileNameDisplay.textContent = file.name;
+        log(file.name);
 
         try {
             const audioBlob = await convert(file);
 
-            const formData = new FormData();
-            formData.append("file", audioBlob, "output.mp3");
+            // const formData = new FormData();
+            // formData.append("file", audioBlob, "output.mp3");
 
-            fetch("/upload", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.text())
-            .then(result => {
-                message(result);
-            })
-            .catch(error => {
-                message("Error uploading file:" + error);
-            });
+            // fetch("/upload", {
+            //     method: "POST",
+            //     body: formData
+            // })
+            // .then(response => response.text())
+            // .then(result => {
+            //     message(result);
+            // })
+            // .catch(error => {
+            //     message("Error uploading file:" + error);
+            // });
         } catch (error) {
             message("Error converting file:" + error);
         }
     } else {
-        fileNameDisplay.textContent = "";
+        log("");
         message("No file selected.");
     }
 }
