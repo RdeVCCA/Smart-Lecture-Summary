@@ -3,6 +3,34 @@ const outputElement = document.getElementById("ffmpeg-output");
 const statusElement = document.getElementById("ffmpeg-status");
 const fileNameDisplay = document.getElementById("file-name");
 const conversionStatus = document.getElementById("conversion-status");
+let startTime;
+let endTime;
+
+async function log(text){
+    const ele = document.getElementById("ffmpeg-output");
+    ele.innerHTML += text + "<br>";
+}
+
+function message(msg){
+    const item = document.getElementById("warning");
+    if(item) {
+        item.textContent = msg;
+    }
+}
+
+function getsize(file){
+    const sizeInBytes = file.size;
+    
+    const sizeInKB = sizeInBytes / 1024;
+
+    const sizeInMB = sizeInKB / 1024;
+    
+    if (sizeInMB > 1) {
+        console.log(`File size: ${sizeInMB.toFixed(2)} MB`);
+    } else {
+        console.log(`File size: ${sizeInKB.toFixed(2)} KB`);
+    }
+}
 
 worker.onmessage = function (event) {
     var message = event.data;
@@ -12,7 +40,6 @@ worker.onmessage = function (event) {
         break;
       case "stdout":
       case "stderr":
-        
         outputElement.textContent += message.data + "\n";
         break;
       case "start":
@@ -23,7 +50,44 @@ worker.onmessage = function (event) {
         statusElement.textContent = "Processing completed";
         break;
     }
-  };
+};
+
+
+async function upload() {
+    const fileInput = document.getElementById("audio");
+    const file = fileInput.files[0];
+    // const fileNameDisplay = document.getElementById("file-name");
+
+    if (file) {
+        // display file name next to upload button
+        log(file.name);
+
+        try {
+            startTime = new Date().getTime();
+            const audioBlob = await convert(file);
+
+            // const formData = new FormData();
+            // formData.append("file", audioBlob, "output.mp3");
+
+            // fetch("/upload", {
+            //     method: "POST",
+            //     body: formData
+            // })
+            // .then(response => response.text())
+            // .then(result => {
+            //     message(result);
+            // })
+            // .catch(error => {
+            //     message("Error uploading file:" + error);
+            // });
+        } catch (error) {
+            message("Error converting file:" + error);
+        }
+    } else {
+        log("");
+        message("No file selected.");
+    }
+}
 
 async function convert(file) {
     return new Promise((resolve, reject) => {
@@ -43,6 +107,73 @@ async function convert(file) {
 
         reader.readAsArrayBuffer(file);
     });
+}
+
+function postToWorker(videoData, filename, resolve, reject) {
+    // Send a command to the worker to convert video to audio
+    console.log("Video data:", videoData);
+    console.log("Sending data to worker, filename:", filename, "data size:", videoData.length);
+    worker.postMessage({
+        type: 'command',
+        arguments: ['-i', filename, '-vn', '-ac', '2', '-strict', '-2', '-f', 'webm', 'output.webm'],
+        files: [{ name: filename, data: videoData }]
+    });
+
+    // Handle messages from the worker
+    worker.onmessage = function (event) {
+        var message = event.data;
+        console.log(message.type);
+        if (message.type === "stdout") {
+            log(message.data);
+            console.log(message);
+        }else if (message.type === "done") {
+            // Conversion is complete
+            console.log("Worker finished processing, message:", message);
+            const audioData = message.data[0].data;
+
+            if (!audioData || audioData.length === 0) {
+                console.error("No audio data received from the worker");
+                reject(new Error("No audio data received from the worker"));
+                return;
+            }
+
+            const audioBlob = new Blob([audioData], { type: 'audio/wav' });
+            endTime = new Date().getTime();
+            console.log("Conversion time:", (endTime - startTime) / 1000, "seconds");
+            // Trigger file download
+            downloadConvertedFile(audioBlob, 'converted_audio.wav');
+
+            // Update conversion status on the page
+            if (conversionStatus) {
+                conversionStatus.textContent = "Conversion successful!";
+            }
+
+            resolve(audioBlob);
+        } else if (message.type === "error") {
+            // Handle error
+            if (conversionStatus) {
+                conversionStatus.textContent = "Error during conversion.";
+            }
+            console.error("Worker error:", message.data);
+            reject(message.data);
+        }
+    };
+}
+
+// remove once not needed
+function downloadConvertedFile(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+
+    a.click();
+
+    setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 100);
 }
 
 // add back once download feature is removed Post data into backend
@@ -76,171 +207,6 @@ async function convert(file) {
 //         }
 //     };
 // }
-
-
-//remove once not needed, this confirm and open up a download
-function postToWorker(videoData, filename, resolve, reject) {
-    // Send a command to the worker to convert video to audio
-    console.log("Video data:", videoData);
-    console.log("Sending data to worker, filename:", filename, "data size:", videoData.length);
-    worker.postMessage({
-        type: 'command',
-        arguments: ['-i', filename, '-vn', '-ar', '44100', '-ac', '2', '-f', 'wav', 'output.wav'],
-        files: [{ name: filename, data: videoData }]
-    });
-
-    // Handle messages from the worker
-    worker.onmessage = function (event) {
-        var message = event.data;
-        if (message.type === "stdout") {
-            log(message.data);
-        }
-        if (message.type === "done") {
-            // Conversion is complete
-            console.log("Worker finished processing, message:", message);
-            const audioData = message.data[0].data;
-
-            if (!audioData || audioData.length === 0) {
-                console.error("No audio data received from the worker");
-                reject(new Error("No audio data received from the worker"));
-                return;
-            }
-
-            const audioBlob = new Blob([audioData], { type: 'audio/wav' });
-
-            // Trigger file download
-            downloadConvertedFile(audioBlob, 'converted_audio.wav');
-
-            // Update conversion status on the page
-            if (conversionStatus) {
-                conversionStatus.textContent = "Conversion successful!";
-            }
-
-            resolve(audioBlob);
-        } else if (message.type === "error") {
-            // Handle error
-            if (conversionStatus) {
-                conversionStatus.textContent = "Error during conversion.";
-            }
-            console.error("Worker error:", message.data);
-            reject(message.data);
-        }
-    };
-}
-// remove once not needed
-function downloadConvertedFile(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-
-    a.click();
-
-    setTimeout(() => {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-    }, 100);
-}
-
-
-function getsize(file){
-    const sizeInBytes = file.size;
-    
-    const sizeInKB = sizeInBytes / 1024;
-
-    const sizeInMB = sizeInKB / 1024;
-    
-    if (sizeInMB > 1) {
-        console.log(`File size: ${sizeInMB.toFixed(2)} MB`);
-    } else {
-        console.log(`File size: ${sizeInKB.toFixed(2)} KB`);
-    }
-}
-
-// async function upload() {
-//     // const fileInput = document.getElementById("audio");
-//     const fileInput = document.getElementById("audio-upload");
-//     const file = fileInput.files[0];
-
-//     if (file) {
-//         try {
-//             const audioBlob = await convert(file);
-
-//             const formData = new FormData();
-//             formData.append("file", audioBlob, "output.mp3");
-
-//             fetch("/upload", {
-//                 method: "POST",
-//                 body: formData
-//             })
-//             .then(response => response.text())
-//             .then(result => {
-//                 message(result);
-//             })
-//             .catch(error => {
-//                 message("Error uploading file:" + error);
-//             });
-//         } catch (error) {
-//             message("Error converting file:" + error);
-//         }
-//     } else {
-//         message("No file selected.");
-//     }
-// }
-
-// function message(msg){
-//     const item = document.getElementById("warning");
-//     item.textContent = msg;
-// }
-
-function log(text){
-    const ele = document.getElementById("ffmpeg-output");
-    ele.innerHTML += text + "<br>";
-}
-
-async function upload() {
-    const fileInput = document.getElementById("audio");
-    const file = fileInput.files[0];
-    // const fileNameDisplay = document.getElementById("file-name");
-
-    if (file) {
-        // display file name next to upload button
-        log(file.name);
-
-        try {
-            const audioBlob = await convert(file);
-
-            // const formData = new FormData();
-            // formData.append("file", audioBlob, "output.mp3");
-
-            // fetch("/upload", {
-            //     method: "POST",
-            //     body: formData
-            // })
-            // .then(response => response.text())
-            // .then(result => {
-            //     message(result);
-            // })
-            // .catch(error => {
-            //     message("Error uploading file:" + error);
-            // });
-        } catch (error) {
-            message("Error converting file:" + error);
-        }
-    } else {
-        log("");
-        message("No file selected.");
-    }
-}
-
-function message(msg){
-    const item = document.getElementById("warning");
-    if(item) {
-        item.textContent = msg;
-    }
-}
-
 
 function listing(){
     fetch("/list-files", {
@@ -278,7 +244,4 @@ async function query(){
     }
 }
 
-// debugging
-console.log(outputElement);
-console.log(statusElement);
-console.log(fileInput);
+

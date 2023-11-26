@@ -1,5 +1,6 @@
-importScripts("https://tingan1212.github.io/static/frameworks/ffmpeg.js");
-console.log("FFmpeg.js loaded from: https://tingan1212.github.io/static/frameworks/ffmpeg.js");
+const source = "https://tingan1212.github.io/static/frameworks/ffmpeg-all-codecs.js"
+importScripts(source);
+console.log("FFmpeg.js loaded from: " + source);
 
 function print(text) {
   postMessage({
