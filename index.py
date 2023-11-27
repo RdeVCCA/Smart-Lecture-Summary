@@ -31,6 +31,13 @@ def convert_video_to_audio(video_path, audio_path):
     command = ['ffmpeg', '-i', video_path, '-q:a', '0', '-map', 'a', audio_path, '-y']
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+def compress_file(input_file_path, output_file_path):
+    target_size_mb = 25
+    target_size_bytes = target_size_mb * 1024 * 1024  # Convert MB to bytes
+
+    # Run ffmpeg to compress the file
+    subprocess.run(['ffmpeg', '-i', input_file_path, '-fs', str(target_size_bytes), output_file_path])
+
 @app.route('/static/js/<filename>')
 def serve_js(filename):
     return send_from_directory('static/js', filename, mimetype='text/javascript')
@@ -46,19 +53,19 @@ def upload_file():
         return "No selected file", 400
 
     temp_dir = tempfile.mkdtemp()
-    video_path = os.path.join(temp_dir, file.filename)
-    file.save(video_path)
+    audio_path = os.path.join(temp_dir, os.path.splitext(file.filename)[0] + ".webm")
+    file.save(audio_path)
+    compressed_path = os.path.join(temp_dir, "compressed.webm")
+    try:
+        print(audio_path,compressed_path)
+        compress_file(audio_path, compressed_path)
+        
+    except:
+        os.remove(compressed_path)
+        os.remove(audio_path)
+        os.rmdir(temp_dir)
 
-    audio_path = os.path.join(temp_dir, os.path.splitext(file.filename)[0] + '.mp3')
-    convert_video_to_audio(video_path, audio_path)
-
-    # Handle the audio file as needed
-
-    os.remove(video_path)
-    os.remove(audio_path)
-    os.rmdir(temp_dir)
-
-    return "Audio conversion successful"
+    return "Audio conversion successful at " + audio_path
 
 @app.route('/query')
 def proxy_query():

@@ -65,27 +65,27 @@ async function upload() {
         try {
             startTime = new Date().getTime();
             const audioBlob = await convert(file);
+            log("Sending file to server...");
+            const formData = new FormData();
+            formData.append("file", audioBlob, "output.webm");
 
-            // const formData = new FormData();
-            // formData.append("file", audioBlob, "output.mp3");
-
-            // fetch("/upload", {
-            //     method: "POST",
-            //     body: formData
-            // })
-            // .then(response => response.text())
-            // .then(result => {
-            //     message(result);
-            // })
-            // .catch(error => {
-            //     message("Error uploading file:" + error);
-            // });
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(result => {
+                log(result);
+            })
+            .catch(error => {
+                log("Error uploading file:" + error);
+            });
         } catch (error) {
-            message("Error converting file:" + error);
+            log("Error converting file:" + error);
         }
     } else {
         log("");
-        message("No file selected.");
+        log("No file selected.");
     }
 }
 
@@ -127,28 +127,23 @@ function postToWorker(videoData, filename, resolve, reject) {
             log(message.data);
             console.log(message);
         }else if (message.type === "done") {
-            // Conversion is complete
-            console.log("Worker finished processing, message:", message);
-            const audioData = message.data[0].data;
-
-            if (!audioData || audioData.length === 0) {
-                console.error("No audio data received from the worker");
-                reject(new Error("No audio data received from the worker"));
-                return;
+            const audioData = message.data[0].data; // Audio file data
+            const conversionStatus = document.getElementById("conversion-status");
+            if (conversionStatus) {
+                conversionStatus.textContent = "Conversion successful!";
             }
-
             const audioBlob = new Blob([audioData], { type: 'audio/wav' });
             endTime = new Date().getTime();
             console.log("Conversion time:", (endTime - startTime) / 1000, "seconds");
+            resolve(new Blob([audioData], { type: 'audio/webm' }));
+            
             // Trigger file download
-            downloadConvertedFile(audioBlob, 'converted_audio.wav');
+            //downloadConvertedFile(audioBlob, 'converted_audio.wav');
 
             // Update conversion status on the page
             if (conversionStatus) {
                 conversionStatus.textContent = "Conversion successful!";
             }
-
-            resolve(audioBlob);
         } else if (message.type === "error") {
             // Handle error
             if (conversionStatus) {
