@@ -132,7 +132,6 @@ function postToWorker(videoData, filename, resolve, reject) {
             if (conversionStatus) {
                 conversionStatus.textContent = "Conversion successful!";
             }
-            const audioBlob = new Blob([audioData], { type: 'audio/wav' });
             endTime = new Date().getTime();
             console.log("Conversion time:", (endTime - startTime) / 1000, "seconds");
             resolve(new Blob([audioData], { type: 'audio/webm' }));
