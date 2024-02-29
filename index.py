@@ -5,6 +5,18 @@ import os
 import subprocess  # import subprocess for FFmpeg
 import json
 from openai import OpenAI
+import nltk
+nltk.download('punkt')
+
+app = Flask(__name__)
+gpt = os.environ.get('CHAT_GPT')
+
+if gpt:
+    keys = {"chatgpt":gpt}
+else:
+    keys = {"chatgpt":os.getenv('CHAT_GPT')}
+
+client = OpenAI(api_key=keys["chatgpt"])
 
 def is_api_key_valid(api_key: str) -> bool:
     url = "https://api.openai.com/v1/engines/gpt-3.5-turbo-instruct/completions"
@@ -20,15 +32,10 @@ def is_api_key_valid(api_key: str) -> bool:
     response = requests.post(url, headers=headers, json=data)
     return response.status_code == 200
 
-app = Flask(__name__)
-gpt = os.environ.get('CHAT_GPT')
-
-if gpt:
-    keys = {"chatgpt":gpt}
-else:
-    keys = {"chatgpt":os.getenv('CHAT_GPT')}
-
-client = OpenAI(api_key=keys["chatgpt"])
+def save_result(result, filename):
+    # result is all text, save in .md
+    with open("testing/"+filename+".md", "w") as file:
+        file.write(result)
 
 def convert_video_to_audio(video_path, audio_path):
     command = ['ffmpeg', '-i', video_path, '-q:a', '0', '-map', 'a', audio_path, '-y']
@@ -47,13 +54,62 @@ def speech_to_text(filename,dir):
         transcription = client.audio.transcriptions.create(
         model="whisper-1", 
         file=f,
-        # language="en"
+        language="en"
         )
         result = transcription.text
     
     os.remove(filename)
     os.rmdir(dir)
     return result
+
+def get_summary(lecture_content):
+    prompt = "Can you summarize the main ideas of this lecture:" + lecture_content
+
+    tokens = nltk.word_tokenize(prompt)
+    print(f"total length of tokens in lecture: {len(tokens)}")
+
+    if len(tokens) > 3048: #splitting up the lecture length into different length and summarise it separately
+        prompt_lst = []
+        if len(tokens) % 3048 != 0:
+            times = len(tokens) // 3048 + 1
+        else:
+            times = len(tokens) / 3048
+        start = 0
+        end = 3048
+        for i in range(times):
+            if i + 1 != times:
+                prompt_lst.append(prompt[start: end])
+                start += 3048
+                end += 3048
+            else:
+                prompt_lst.append(prompt[start:len(tokens)])
+        print(f"Number of sets of prompts: {len(prompt_lst)}")
+        for i in range(times):
+            print(f"Length of prompt{i}: {len(prompt_lst[i])}")
+        
+        summary = ''
+        for i in range(0, times):
+            response = client.chat.completions.create(
+  model="gpt-3.5-turbo-0613",
+  messages=[
+    {"role": "system", "content": "You are a professional essay writer and is good at summarising lectures."},
+    {"role": "user", "content": prompt_lst[i]}
+  ],
+#   max_tokens=400
+)
+            summary += response.choices[0].message.content.strip()
+            summary += "HERE IS THE BREAK"
+        return summary
+    else:
+        response = client.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a professional essay writer and is good at summarising lectures."},
+    {"role": "user", "content": prompt}
+  ],
+#   max_tokens=400
+)
+        return response.choices[0].message.content.strip()
 
 @app.route('/static/js/<filename>')
 def serve_js(filename):
@@ -87,8 +143,17 @@ def upload_file():
     print("Transcribing audio...")
     text_result = speech_to_text(compressed_path,temp_dir)
     print("Transcription successful")
+    print("Creating summary...")
+    summary = get_summary(text_result)
     
-    return "\nTranscription: " + text_result
+    print("Summary successful")
+    print("Results are being saved...")
+    #save both result
+    save_result(text_result, "lecture-audio-transcription")
+    save_result(summary, "lecture-summary")
+
+    print("Results saved successfully, returning...")
+    return "\nTranscription: " + text_result + "\n\n\n" + "Summary: " + summary
 
 # @app.route('/query')
 # def proxy_query():

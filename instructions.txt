@@ -12,5 +12,10 @@ Flask Tutorial: https://youtu.be/Z1RJmh_OqeA?t=378
 Vercel: https://vercel.com/
 FFMPEG: https://github.com/Kagami/ffmpeg.js/
 SpeechRecognition: https://pypi.org/project/SpeechRecognition/
-ChatGPT: 
+
+Pricing:
+whisper: $0.006 / minute
+gpt-3.5-turbo: $0.0015 / 1K tokens	$0.0020 / 1K tokens | Input Output
+
+To do: 
 
