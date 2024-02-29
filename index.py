@@ -7,7 +7,7 @@ import json
 from openai import OpenAI
 
 def is_api_key_valid(api_key: str) -> bool:
-    url = "https://api.openai.com/v1/engines/davinci/completions"
+    url = "https://api.openai.com/v1/engines/gpt-3.5-turbo-instruct/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
@@ -84,7 +84,10 @@ def upload_file():
 
     os.remove(audio_path)
     print("Audio conversion successful at " + compressed_path + " ")
+    print("Transcribing audio...")
     text_result = speech_to_text(compressed_path,temp_dir)
+    print("Transcription successful")
+    
     return "\nTranscription: " + text_result
 
 # @app.route('/query')
