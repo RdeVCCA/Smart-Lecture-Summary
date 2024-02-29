@@ -3,8 +3,8 @@ import requests
 import tempfile
 import os
 import subprocess  # import subprocess for FFmpeg
-import database
 import json
+from openai import OpenAI
 
 def is_api_key_valid(api_key: str) -> bool:
     url = "https://api.openai.com/v1/engines/davinci/completions"
@@ -22,10 +22,13 @@ def is_api_key_valid(api_key: str) -> bool:
 
 app = Flask(__name__)
 gpt = os.environ.get('CHAT_GPT')
+
 if gpt:
     keys = {"chatgpt":gpt}
 else:
     keys = {"chatgpt":os.getenv('CHAT_GPT')}
+
+client = OpenAI(api_key=keys["chatgpt"])
 
 def convert_video_to_audio(video_path, audio_path):
     command = ['ffmpeg', '-i', video_path, '-q:a', '0', '-map', 'a', audio_path, '-y']
@@ -37,6 +40,20 @@ def compress_file(input_file_path, output_file_path):
 
     # Run ffmpeg to compress the file
     subprocess.run(['ffmpeg', '-i', input_file_path, '-fs', str(target_size_bytes), output_file_path])
+
+def speech_to_text(filename,dir):
+    result = ""
+    with open(filename, 'rb') as f:
+        transcription = client.audio.transcriptions.create(
+        model="whisper-1", 
+        file=f,
+        # language="en"
+        )
+        result = transcription.text
+    
+    os.remove(filename)
+    os.rmdir(dir)
+    return result
 
 @app.route('/static/js/<filename>')
 def serve_js(filename):
@@ -65,23 +82,23 @@ def upload_file():
         os.remove(audio_path)
         os.rmdir(temp_dir)
 
-    return "Audio conversion successful at " + audio_path
+    os.remove(audio_path)
+    print("Audio conversion successful at " + compressed_path + " ")
+    text_result = speech_to_text(compressed_path,temp_dir)
+    return "\nTranscription: " + text_result
 
-@app.route('/query')
-def proxy_query():
-    query = request.args.get('query')
-    type = request.args.get('type')
-    result = database.query(query, type)
-    print(result)
-    return json.dumps(result)
+# @app.route('/query')
+# def proxy_query():
+#     query = request.args.get('query')
+#     type = request.args.get('type')
+#     result = database.query(query, type)
+#     print(result)
+#     return json.dumps(result)
 
 @app.route("/")
 def hello_world():
-    return render_template('testing_template.html',
-                           key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])),
-                           db_status=(lambda x: "Database Online" if x=="success" else "Database Offline")(database.query("", "test")["status"]),
-                           test_query=database.query("", "test")["content"]
+    return render_template('testing_template.html', key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])),
                            )
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8888, debug=True)
+    app.run(host="0.0.0.0", port=9999, debug=True)
