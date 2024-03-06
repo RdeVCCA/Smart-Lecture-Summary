@@ -6,6 +6,8 @@ import subprocess  # import subprocess for FFmpeg
 import json
 from openai import OpenAI
 import nltk
+
+# Download the punkt tokenizer for sentence splitting
 nltk.download('punkt')
 
 app = Flask(__name__)
@@ -95,7 +97,6 @@ def get_summary(lecture_content):
     {"role": "system", "content": "You are a professional essay writer and is good at summarising lectures."},
     {"role": "user", "content": prompt_lst[i]}
   ],
-#   max_tokens=400
 )
             summary += response.choices[0].message.content.strip()
             summary += "HERE IS THE BREAK"
@@ -107,7 +108,6 @@ def get_summary(lecture_content):
     {"role": "system", "content": "You are a professional essay writer and is good at summarising lectures."},
     {"role": "user", "content": prompt}
   ],
-#   max_tokens=400
 )
         return response.choices[0].message.content.strip()
 
@@ -148,6 +148,7 @@ def upload_file():
     
     print("Summary successful")
     print("Results are being saved...")
+
     #save both result
     save_result(text_result, "lecture-audio-transcription")
     save_result(summary, "lecture-summary")
@@ -155,16 +156,8 @@ def upload_file():
     print("Results saved successfully, returning...")
     return "\nTranscription: " + text_result + "\n\n\n" + "Summary: " + summary
 
-# @app.route('/query')
-# def proxy_query():
-#     query = request.args.get('query')
-#     type = request.args.get('type')
-#     result = database.query(query, type)
-#     print(result)
-#     return json.dumps(result)
-
 @app.route("/")
-def hello_world():
+def render_main():
     return render_template('testing_template.html', key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])),
                            )
 
