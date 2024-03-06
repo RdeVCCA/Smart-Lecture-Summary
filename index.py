@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, send_from_directory
 import requests
 import tempfile
 import os
+import re
+from datetime import datetime
 import subprocess  # import subprocess for FFmpeg
 import json
 from openai import OpenAI
@@ -106,6 +108,36 @@ def get_summary(lecture_content):
 def convert_video_to_audio(video_path, audio_path):
     command = ['ffmpeg', '-i', video_path, '-q:a', '0', '-map', 'a', audio_path, '-y']
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
+# file renaming function
+def rename_file(original_file):
+    current_datetime = datetime.now()
+    date_stamp = current_datetime.strftime('%d%m%Y-%H%M')
+    file_name, file_extension = os.path.splitext(original_file)
+    new_file_name = f"{file_name}-{date_stamp}{file_extension}"
+    os.rename(original_file, new_file_name)
+
+# time elapsed since file rename function
+def calculate_time_since(filename):
+    datetime_part = re.search(r'-(\d{8}-\d{4})\.', filename)
+    if datetime_part:
+        datetime_str = datetime_part.group(1)
+    else:
+        print("datetime format in the filename is not recognized.")
+        return
+    file_datetime = datetime.strptime(datetime_str, '%d%m%Y-%H%M')
+    current_datetime = datetime.now()
+    time_difference = current_datetime - file_datetime
+    return time_difference
+
+# delete empty folders
+def delete_empty_folders(directory):
+    for root, dirs, files in os.walk(directory, topdown=False):
+        for name in dirs:
+            dir_path = os.path.join(root, name)
+            if not os.listdir(dir_path):
+                os.rmdir(dir_path)
 
 @app.route('/static/js/<filename>')
 def serve_js(filename):
