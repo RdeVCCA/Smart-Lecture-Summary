@@ -18,15 +18,14 @@ whisper: $0.006 / minute
 gpt-3.5-turbo: $0.0015 / 1K tokens	$0.0020 / 1K tokens | Input Output
 
 To do: 
-- Website redesign
-- Better load timer
-- Time and price benchmarking
-- Code clean up
-- Dynamic status update
-- Setting up environment
-- Finetune summary and remove extra words
-- Formatting summary on Website
-- Create download for transcript and summary
-- Double confirm file management
-- Test hosting
+- Website redesign (Lyon)
+- Better load timer (Wait)
+- Time and price benchmarking (Discussion)
+- Code clean up (Discussion)
+- Dynamic status update (Discussion)
+- Setting up environment (Larissa)
+- Finetune summary and remove extra words (Natalie)
+- Formatting summary on Website (Lyon)
+- Create download for transcript and summary (Discussion)
+- Test hosting (Wait)
 
