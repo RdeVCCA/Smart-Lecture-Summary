@@ -61,27 +61,73 @@ async function upload() {
     if (file) {
         // display file name next to upload button
         log(file.name);
-
         try {
             startTime = new Date().getTime();
             const audioBlob = await convert(file);
             log("Sending file to server...");
             const formData = new FormData();
             formData.append("file", audioBlob, "output.webm");
-
-            fetch("/upload", {
+    
+            const responseAudio = await fetch("/audio", {
                 method: "POST",
                 body: formData
-            })
-            .then(response => response.text())
-            .then(result => {
-                log(result);
-            })
-            .catch(error => {
-                log("Error uploading file:" + error);
             });
+            const resultAudio = await responseAudio.json();
+            if (resultAudio.status != 200) {
+                log("Error uploading file.")
+                return;
+            }
+            log("File uploaded successfully.");
+    
+            log("File compression started.");
+            const responseCompression = await fetch("/compression", {
+                method: "POST",
+                body: JSON.stringify(resultAudio),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            const resultCompression = await responseCompression.json();
+            if (resultCompression.status != 200) {
+                log("Error compressing file.")
+                return;
+            }
+            log("File compression completed.");
+    
+            log("Transcription started.");
+            const responseTranscribe = await fetch("/transcribe", {
+                method: "POST",
+                body: JSON.stringify(resultCompression),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            const resultTranscribe = await responseTranscribe.json();
+            if (resultTranscribe.status != 200) {
+                log("Error transcribing file.")
+                return;
+            }
+            log("Transcription completed.");
+    
+            log("Summary in progress.");
+            const responseSummary = await fetch("/summary", {
+                method: "POST",
+                body: JSON.stringify(resultTranscribe),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            const resultSummary = await responseSummary.json();
+            if (resultSummary.status != 200) {
+                log("Error generating summary.")
+                return;
+            }
+            log("Summary completed.");
+            
+            console.log(resultSummary);
+    
         } catch (error) {
-            log("Error converting file:" + error);
+            log("Error: " + error);
         }
     } else {
         log("");
