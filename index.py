@@ -38,7 +38,7 @@ def is_api_key_valid(api_key: str) -> bool:
 
 def save_result(result, filename, subfix):
     # result is all text, save in .md
-    with open("testing/"+filename+"." + subfix, "w") as file:
+    with open(filename+"." + subfix, "w") as file:
         file.write(result)
 
 def compress_file(input_file_path, output_file_path):
@@ -59,7 +59,7 @@ def speech_to_text(filename):
     return result
 
 def get_summary(lecture_content):
-    prompt = "Can you summarize the main ideas of this lecture, paragraph it and highlight important points?" + lecture_content
+    prompt = "Can you summarize the main ideas of this lecture:" + lecture_content
 
     tokens = nltk.word_tokenize(prompt)
     print(f"total length of tokens in lecture: {len(tokens)}")
@@ -205,7 +205,7 @@ def transcribe():
     compressed_path = request.json["filepath"]
 
     print("Transcribing audio...")
-    text_result = speech_to_text(compressed_path,temp_dir)
+    text_result = speech_to_text(compressed_path)
     print("Transcription successful")
     os.remove(compressed_path)
     save_result(text_result, os.path.join(temp_dir,"transcription"), "txt")
@@ -267,55 +267,14 @@ def summary():
     summary = get_summary(text_result)
     print("Summary successful")
 
-    save_result(summary, os.path.join(temp_dir,"summary"), ".md")
-    return {"summary": summary, "summary_path": os.path.join(temp_dir,"summary.md"), "status": 200}
+    save_result(summary, os.path.join(temp_dir,"summary"), "md")
+    return {"summary": summary, "transcription_path": request.json["transcription_path"],"summary_path": os.path.join(temp_dir,"summary.md"), "status": 200}
 
 @app.route('/download', methods=['POST'])
 
 @app.route('/delete', methods=['POST'])
 
 @app.route("/clean", methods=['POST'])
-
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return "No file part", 400
-
-    file = request.files['file']
-
-    if file.filename == '':
-        return "No selected file", 400
-
-    temp_dir = tempfile.mkdtemp()
-    audio_path = os.path.join(temp_dir, os.path.splitext(file.filename)[0] + ".webm")
-    file.save(audio_path)
-    compressed_path = os.path.join(temp_dir, "compressed.webm")
-    try:
-        print(audio_path,compressed_path)
-        compress_file(audio_path, compressed_path)
-        
-    except:
-        os.remove(compressed_path)
-        os.remove(audio_path)
-        os.rmdir(temp_dir)
-
-    os.remove(audio_path)
-    print("Audio conversion successful at " + compressed_path + " ")
-    print("Transcribing audio...")
-    text_result = speech_to_text(compressed_path)
-    print("Transcription successful")
-    print("Creating summary...")
-    summary = get_summary(text_result)
-    
-    print("Summary successful")
-    print("Results are being saved...")
-
-    #save both result
-    save_result(text_result, "lecture-audio-transcription", "txt")
-    save_result(summary, "lecture-summary",".md")
-
-    print("Results saved successfully, returning...")
-    return "\nTranscription: " + text_result + "\n\n\n" + "Summary: " + summary
 
 @app.route("/")
 def render_main():
