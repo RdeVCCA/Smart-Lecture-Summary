@@ -45,13 +45,14 @@ def convert_video_to_audio(video_path, audio_path):
     command = ['ffmpeg', '-i', video_path, '-q:a', '0', '-map', 'a', audio_path, '-y']
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-# file renaming function
 def rename_file(original_file):
     current_datetime = datetime.now()
     date_stamp = current_datetime.strftime('%d%m%Y-%H%M')
     file_name, file_extension = os.path.splitext(original_file)
     new_file_name = f"{file_name}-{date_stamp}{file_extension}"
     os.rename(original_file, new_file_name)
+
+    return new_file_name
 
 # time elapsed since file rename function
 def calculate_time_since(filename):
@@ -71,8 +72,15 @@ def delete_empty_folders(directory):
     for root, dirs, files in os.walk(directory, topdown=False):
         for name in dirs:
             dir_path = os.path.join(root, name)
-            if not os.listdir(dir_path):
-                os.rmdir(dir_path)
+            try:
+                if not os.listdir(dir_path):
+                    try:
+                        os.rmdir(dir_path)
+                        print("Removed empty folder:", dir_path)
+                    except:
+                        print(f"Failed to remove {dir_path}")
+            except:
+                print(f"Failed to list {dir_path}")
 
 @app.route('/static/js/<filename>')
 def serve_js(filename):
@@ -99,11 +107,26 @@ def audio():
     if file.filename == '':
         return "No selected file", 400
     
-    temp_dir = tempfile.mkdtemp()
-    audio_path = os.path.join(temp_dir, os.path.splitext(file.filename)[0] + ".webm")
+    #get epoch time
+    def encode(epoch):
+        list_ = "abcdefghijklmnopqrstuvwxyz"
+        result = ""
+        for i in epoch:
+            result += list_[int(i)]
+        return result
+
+    epoch_time = str(datetime.now().timestamp()).replace('.', '')
+    print(epoch_time)
+
+    dir = "upload/" + encode(epoch_time)
+    os.mkdir(dir)
+
+    audio_path = os.path.join(dir, os.path.splitext(file.filename)[0] + ".webm")
     file.save(audio_path)
 
-    return {"filepath": audio_path, "folder": temp_dir, "status": 200}
+    audio_path = rename_file(audio_path)
+
+    return {"filepath": audio_path, "folder": dir, "status": 200}
 
 @app.route("/compression", methods=['POST'])
 def compression():
@@ -117,6 +140,7 @@ def compression():
 
     compressed_path = file_path.split(".")[0] + "-compressed.webm"
     compress_file(file_path, compressed_path)
+    compressed_path = rename_file(compressed_path)
     os.remove(file_path)
     
     print("Audio conversion successful at " + compressed_path + " ")
@@ -144,7 +168,8 @@ def transcribe():
     print("Transcription successful")
     os.remove(compressed_path)
     save_result(text_result, os.path.join(temp_dir,"transcription"), "txt")
-    return {"transcription": text_result, "transcription_path": os.path.join(temp_dir,"transcription.txt"), "folder":temp_dir, "status": 200}
+    transcription_path = rename_file(os.path.join(temp_dir,"transcription.txt"))
+    return {"transcription": text_result, "transcription_path": transcription_path, "folder":temp_dir, "status": 200}
 
 @app.route('/summary', methods=['POST'])
 def summary():
@@ -203,7 +228,8 @@ def summary():
     print("Summary successful")
 
     save_result(summary, os.path.join(temp_dir,"summary"), "md")
-    return {"summary": summary, "transcription_path": request.json["transcription_path"],"summary_path": os.path.join(temp_dir,"summary.md"), "status": 200}
+    summary_path = rename_file(os.path.join(temp_dir,"summary.md"))
+    return {"summary": summary, "transcription_path": request.json["transcription_path"],"summary_path": summary_path, "status": 200}
 
 @app.route('/download', methods=['POST'])
 
