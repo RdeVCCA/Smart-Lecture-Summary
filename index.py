@@ -108,7 +108,7 @@ def audio():
 @app.route("/compression", methods=['POST'])
 def compression():
     def compress_file(input_file_path, output_file_path):
-        target_size_mb = 25
+        target_size_mb = 20
         target_size_bytes = target_size_mb * 1024 * 1024  # Convert MB to bytes
         subprocess.run(['ffmpeg', '-i', input_file_path, '-fs', str(target_size_bytes), output_file_path])
     print("Compressing audio...")
