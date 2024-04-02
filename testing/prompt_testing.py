@@ -50,7 +50,6 @@ def get_summary(lecture_content):
                 ],
             )
             summary += response.choices[0].message.content.strip()
-            summary += "HERE IS THE BREAK"
         return summary
     else:
         response = client.chat.completions.create(
