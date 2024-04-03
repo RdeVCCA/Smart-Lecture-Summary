@@ -36,9 +36,9 @@ def get_summary(lecture_content):
         summary = ''
         for i in range(times):
             if firstTime == False:
-                prompt = f"Can you summarise the main ideas of part {i} out of {times} of this lecture, combining from the previous lecture, paragraph it, include headings, bold keywords and express it in .md format: "+ prompt_lst[i]
+                prompt = f"Can you summarise the main ideas of part {i} out of {times} of this lecture, paragraph it, and express it in .md format: "+ prompt_lst[i]
             else:
-                prompt = f"Can you summarize the main ideas of part {i} out of {times} of this lecture, paragraph it, include headings, bold keywords, express it in .md format: " + prompt_lst[i]
+                prompt = f"Can you summarize the main ideas of part {i} out of {times} of this lecture, paragraph it, and express it in .md format: " + prompt_lst[i]
             firstTime = False
             # prompt = f"Can you summarize the main ideas of part {i} out of {times} of this lecture, paragraph it and highlight important points, express it in .md format: " + prompt_lst[i]
 
