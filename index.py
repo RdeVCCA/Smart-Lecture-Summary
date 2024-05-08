@@ -232,15 +232,74 @@ def summary():
     return {"summary": summary, "transcription_path": request.json["transcription_path"],"summary_path": summary_path, "status": 200}
 
 @app.route('/download', methods=['POST'])
+def download():
+    data = request.json
+    if not data or 'folder' not in data or 'filename' not in data:
+        return {"error": "Missing folder or filename"}, 400
+
+    folder = data['folder']
+    filename = data['filename']
+    
+    folder_path = os.path.join('upload', folder)
+    if not os.path.exists(folder_path):
+        return {"error": "Folder does not exist"}, 404
+    if not os.path.exists(os.path.join(folder_path, filename)):
+        return {"error": "File not found"}, 404
+
+    try:
+        return send_from_directory(folder_path, filename, as_attachment=True)
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.route('/delete', methods=['POST'])
+def delete():
+    data = request.json
+    if not data or 'filename' not in data:
+        return {"error": "No filename specified"}, 400
+    
+    filename = data['filename']
 
-@app.route("/clean", methods=['POST'])
+    if not re.match(r'^[\w,\s-]+\.[A-Za-z]{3,4}$', filename):
+        return {"error": "Invalid filename"}, 400
+    
+    upload_folder = 'upload'
+    file_path = os.path.join(upload_folder, filename)
+
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            return {"message": f"File {filename} deleted successfully"}, 200
+        except Exception as e:
+            return {"error": str(e)}, 500
+    else:
+        return {"error": f"File {filename} not found"}, 404
+
+# Number of days to keep files
+DAYS_TO_KEEP = 2
+
+@app.route('/clean', methods=['POST'])
+def clean():
+    time_threshold = datetime.now().timestamp() - (DAYS_TO_KEEP * 24 * 60 * 60)
+    upload_folder = 'upload'
+
+    files_deleted = []
+    for root, _, files in os.walk(upload_folder):
+        for filename in files:
+            file_path = os.path.join(root, filename)
+            try:
+                file_mod_time = os.path.getmtime(file_path)
+                if file_mod_time < time_threshold:
+                    os.remove(file_path)
+                    files_deleted.append(filename)
+            except Exception as e:
+                return {"error": f"Error removing {filename}: {str(e)}"}, 500
+
+    return {"message": "Cleanup successful", "files_deleted": files_deleted}, 200
+
 
 @app.route("/")
 def render_main():
-    return render_template('testing_template.html', key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])),
-                           )
+    return render_template('index.html', key_status=(lambda x: "green" if x else "red")(is_api_key_valid(keys["chatgpt"])))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9999, debug=True)
