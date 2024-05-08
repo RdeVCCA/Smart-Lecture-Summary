@@ -1,0 +1,192 @@
+.warning{
+    color: red;
+}
+
+
+
+@font-face {
+    font-family: "TT";
+    src: url("../fonts/TT/TT Commons Regular.otf");
+}
+
+@font-face {
+    font-family: "TT Bold";
+    src: url("../fonts/TT/TT Commons DemiBold.otf");
+}
+
+@font-face {
+    font-family: "TT Slant";
+    src: url("../fonts/TT/TT Commons DemiBold Italic.otf");
+}
+
+@media only screen and (max-width: 600px) {
+    .title{
+        font-size: calc(0.5rem + 3vw);
+    }
+    .slogan{
+        font-size: calc(0.5rem + 2vw);
+    
+    }
+    .logo-group{
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .status-group{
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+    }
+    .audio-upload{
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .upload-status{
+        margin-left: auto;
+        margin-right: auto !important;
+    }
+}
+
+.title{
+    font-family: "TT Slant";
+    display: block;
+    width: fit-content;
+    /* margin-left: auto;
+    margin-right: auto; */
+    margin-bottom: 0;
+}
+
+.slogan{
+    margin-top: 0;
+}
+
+.status-group{
+    margin-left: auto;
+    margin-right: 2rem;
+    background-color: rgba(255, 255, 255, 0.57);
+    border-radius: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.status-group div{
+    margin: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.status-indicator{
+    width: 1rem;
+    margin-left: auto;
+    height: 1rem;
+    border: solid 3px rgb(158, 158, 158);
+    border-radius: 0.5rem;
+    display: inline-block;
+    background-color: yellow;
+}
+
+.red{
+    background-color: red !important;
+}
+
+.green{
+    background-color: green !important;
+}
+
+.background{
+    /* background-color: white; */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(197,228,255,1) 53%);
+}
+
+body{
+    font-family: "TT";
+    overflow-x: hidden;
+}
+
+.row-box{
+    display: flex;
+    align-items: center;
+}
+
+.logo{
+    height: 16vh;
+    width: 16vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.logo-flex{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#ffmpeg-output{
+    border: solid black 3px;
+    padding: 1rem;
+    border-radius: 1rem;
+    min-height: 5rem;
+    max-height: 50vh;
+    overflow-y: scroll;
+}
+
+.section-head{
+    font-weight: bolder;
+    font-size: larger;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.section{
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.upload{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+}
+
+.upload-status{
+    margin-left: auto;
+    margin-right: 2rem;
+    background-color: rgba(255, 255, 255, 0.57);
+    border-radius: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    height: 10vh;
+    padding: 0.5rem;
+}
+
+.loading-container{
+    display: flex;
+    align-items: center;
+}
+
+#loading-bar{
+    border-radius: 0.5rem;
+    border: solid 3px rgb(158, 158, 158);
+    width: 40vh;
+    height: 4vh;
+    margin-right: 1rem;
+}
+
+.main{
+    display: none;
+}
+
+.division{
+    height: 4px;
+    background: black;
+    border-radius: 2px;
+    width: 100%;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
