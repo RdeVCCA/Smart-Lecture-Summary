@@ -239,8 +239,7 @@ def summary():
 
 @app.route("/")
 def render_main():
-    return render_template('testing_template.html', key_status=(lambda x: "Chat-GPT API key is valid" if x else "Chat-GPT API key is not valid")(is_api_key_valid(keys["chatgpt"])),
-                           )
+    return render_template('index.html', key_status=(lambda x: "green" if x else "red")(is_api_key_valid(keys["chatgpt"])))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9999, debug=True)
