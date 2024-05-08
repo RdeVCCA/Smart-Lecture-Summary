@@ -1,0 +1,21 @@
+.warning{
+    color: red;
+}
+
+#ffmpeg-output{
+    border: solid black 3px;
+}
+
+.section-head{
+    font-weight: bolder;
+    font-size: larger;
+}
+
+.division{
+    height: 4px;
+    background: black;
+    border-radius: 2px;
+    width: 100vw;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}

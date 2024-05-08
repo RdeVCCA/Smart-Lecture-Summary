@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Lecture Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/testing.css') }}">
+</head>
+<body>
+    <h1>Smart Lecture Summary</h1>
+    <div class="division"></div>
+
+    <div>
+        <p class="section-head">Service Status:</p>
+        <p>{{ key_status }}</p>
+        <p>{{ db_status }}</p>
+        <p id="ffmpeg-status">ffmpeg loading...</p>
+    </div>
+    <div class="division"></div>
+
+    <p class="section-head">FFMPEG Output:</p>
+    <pre id="ffmpeg-output">Loading...</pre>
+    <!-- <div class="division"></div>
+
+    <p class="section-head">Database Querying</p>
+    <input type="text" id="query" style="width: 50vw;">
+    <select id="query-type">
+        <option value="select">select</option>
+        <option value="edit">edit</option>
+    </select><br>
+    <button onclick="query()">Query</button>
+    <p id="database-output">{{ test_query }} (Test query)</p> -->
+    <div class="division"></div>
+
+    <p class="section-head">Audio Upload: </p>
+    <input id="audio" type="file" onchange="upload()">
+
+    <script src="{{ url_for('static', filename='js/testing.js') }}"></script>
+    
+
+</body>
+</html>

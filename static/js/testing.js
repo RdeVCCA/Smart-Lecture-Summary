@@ -36,8 +36,7 @@ worker.onmessage = function (event) {
     var message = event.data;
     switch (message.type) {
       case "ready":
-        statusElement.classList.add('green');
-        showMain();
+        statusElement.textContent = "FFmpeg is ready";
         break;
       case "stdout":
       case "stderr":
