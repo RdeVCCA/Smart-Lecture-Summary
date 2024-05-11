@@ -39,8 +39,11 @@ def is_api_key_valid(api_key: str) -> bool:
 def save_result(result, filename, subfix):
     # result is all text, save in .md
     with open(filename+"." + subfix, "w") as file:
-        file.write(result)
-    
+        try:
+            file.write(result.encode('utf-8').decode('utf-8'))
+        except Exception as e:
+            print(e)
+        
 def convert_video_to_audio(video_path, audio_path):
     command = ['ffmpeg', '-i', video_path, '-q:a', '0', '-map', 'a', audio_path, '-y']
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

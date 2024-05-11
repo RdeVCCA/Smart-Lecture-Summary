@@ -6,29 +6,26 @@ const conversionStatus = document.getElementById("conversion-status");
 let startTime;
 let endTime;
 
-async function log(text){
-    const ele = document.getElementById("ffmpeg-output");
-    ele.innerHTML += text + "<br>";
+var filename = "";
+
+async function log(text,target="ffmpeg-output"){
+    // const ele = document.getElementById("ffmpeg-output");
+    if (target == "ffmpeg-output") {
+        const ele = document.getElementById(target);
+        ele.innerHTML += text + "<br>";
+    }else{
+        const ele = document.getElementById(target);
+        ele.innerHTML = text;
+        const ele2 = document.getElementById("ffmpeg-output");
+        ele2.innerHTML += text + "<br>";
+    }
+    
 }
 
 function message(msg){
     const item = document.getElementById("warning");
     if(item) {
         item.textContent = msg;
-    }
-}
-
-function getsize(file){
-    const sizeInBytes = file.size;
-    
-    const sizeInKB = sizeInBytes / 1024;
-
-    const sizeInMB = sizeInKB / 1024;
-    
-    if (sizeInMB > 1) {
-        console.log(`File size: ${sizeInMB.toFixed(2)} MB`);
-    } else {
-        console.log(`File size: ${sizeInKB.toFixed(2)} KB`);
     }
 }
 
@@ -57,15 +54,19 @@ worker.onmessage = function (event) {
 async function upload() {
     const fileInput = document.getElementById("audio");
     const file = fileInput.files[0];
-    // const fileNameDisplay = document.getElementById("file-name");
 
+    log("Converting file...", "status");
+    // setProgress(5);
+    // const fileNameDisplay = document.getElementById("file-name");
     if (file) {
         // display file name next to upload button
         log(file.name);
+        startLoading(file);
         try {
             startTime = new Date().getTime();
             const audioBlob = await convert(file);
-            log("Sending file to server...");
+            jumpStep();
+            log("Sending file to server...", "status");
             const formData = new FormData();
             formData.append("file", audioBlob, "output.webm");
     
@@ -75,12 +76,12 @@ async function upload() {
             });
             const resultAudio = await responseAudio.json();
             if (resultAudio.status != 200) {
-                log("Error uploading file.")
+                log("Error uploading file.", "status")
                 return;
             }
-            log("File uploaded successfully.");
+            log("File uploaded successfully.", "status");
     
-            log("File compression started.");
+            log("File compression started.", "status");
             const responseCompression = await fetch("/compression", {
                 method: "POST",
                 body: JSON.stringify(resultAudio),
@@ -90,12 +91,13 @@ async function upload() {
             });
             const resultCompression = await responseCompression.json();
             if (resultCompression.status != 200) {
-                log("Error compressing file.")
+                log("Error compressing file.", "status")
                 return;
             }
-            log("File compression completed.");
+            log("File compression completed.", "status");
+            jumpStep();
     
-            log("Transcription started.");
+            log("Transcription started.", "status");
             const responseTranscribe = await fetch("/transcribe", {
                 method: "POST",
                 body: JSON.stringify(resultCompression),
@@ -105,12 +107,13 @@ async function upload() {
             });
             const resultTranscribe = await responseTranscribe.json();
             if (resultTranscribe.status != 200) {
-                log("Error transcribing file.")
+                log("Error transcribing file.", "status")
                 return;
             }
-            log("Transcription completed.");
+            log("Transcription completed.", "status");
+            jumpStep();
     
-            log("Summary in progress.");
+            log("Summary in progress.", "status");
             const responseSummary = await fetch("/summary", {
                 method: "POST",
                 body: JSON.stringify(resultTranscribe),
@@ -120,20 +123,57 @@ async function upload() {
             });
             const resultSummary = await responseSummary.json();
             if (resultSummary.status != 200) {
-                log("Error generating summary.")
+                log("Error generating summary.", "status")
                 return;
             }
-            log("Summary completed.");
+            log("Summary completed.", "status");
+            jumpStep();
             
             console.log(resultSummary);
+            var path = resultSummary.summary_path;
+            filename = path.split("/")[1];
+            log("Download ready.", "status");
+            download();
     
         } catch (error) {
-            log("Error: " + error);
+            log("Error: " + error, "status");
         }
     } else {
         log("");
-        log("No file selected.");
+        log("No file selected.", "status");
     }
+}
+
+function download(){
+    if (filename == ""){
+        return;
+    }
+
+    var folder = filename.split("\\")[0];
+    var filename_ = filename.split("\\")[1];
+
+    fetch("/download", {
+        method: "POST",
+        body: JSON.stringify({folder: folder, filename: filename_}),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(response => {
+        if (!response.ok) {
+            return response.json().then(json => {
+                throw new Error(json.error || 'Unknown error');
+            });
+        }
+        return response.blob(); // convert the response to a Blob
+    })
+    .then(blob => {
+        var url = window.URL.createObjectURL(blob); // create a URL for the Blob
+        var a = document.createElement('a'); // create a link element
+        a.href = url; // set the href of the link to the Blob URL
+        a.download = filename_; // set the filename
+        a.click(); // simulate a click on the link
+    })
+    .catch(error => console.error(error));
 }
 
 async function convert(file) {
@@ -200,54 +240,6 @@ function postToWorker(videoData, filename, resolve, reject) {
         }
     };
 }
-
-// remove once not needed
-function downloadConvertedFile(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-
-    a.click();
-
-    setTimeout(() => {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-    }, 100);
-}
-
-// add back once download feature is removed Post data into backend
-// function postToWorker(videoData, filename, resolve, reject) {
-//     // Send a command to the worker to convert video to audio
-//     worker.postMessage({
-//         type: 'command',
-//         arguments: ['-i', filename, '-vn', '-ar', '44100', '-ac', '2', '-ab', '192k', '-f', 'mp3', 'output.mp3'],
-//         files: [{ name: filename, data: videoData }]
-//     });
-
-//     // Handle messages from the worker
-//     worker.onmessage = function (event) {
-//         var message = event.data;
-
-//         if (message.type === "done") {
-//             // conversion is complete
-//             const audioData = message.data[0].data; // Audio file data
-//             const conversionStatus = document.getElementById("conversion-status");
-//             if (conversionStatus) {
-//                 conversionStatus.textContent = "Conversion successful!";
-//             }
-//             resolve(new Blob([audioData], { type: 'audio/mp3' }));
-//         } else if (message.type === "error") {
-//             // Handle error
-//             const conversionStatus = document.getElementById("conversion-status");
-//             if (conversionStatus) {
-//                 conversionStatus.textContent = "Error during conversion.";
-//             }
-//             reject(message.data);
-//         }
-//     };
-// }
 
 function listing(){
     fetch("/list-files", {

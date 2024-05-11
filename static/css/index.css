@@ -168,14 +168,6 @@ body{
     align-items: center;
 }
 
-#loading-bar{
-    border-radius: 0.5rem;
-    border: solid 3px rgb(158, 158, 158);
-    width: 40vh;
-    height: 4vh;
-    margin-right: 1rem;
-}
-
 .main{
     display: none;
 }
@@ -187,4 +179,50 @@ body{
     width: 100%;
     margin-top: 1vh;
     margin-bottom: 1vh;
+}
+
+.align-v{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 5vh;
+}
+
+#status{
+    font-family: "TT";
+}
+
+.loading-parent{
+    position: relative;
+    padding: 0;
+    width: 40vh;
+    height: 4vh;
+}
+
+#loading-bar{
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 0.5rem;
+    border: solid 3px rgb(158, 158, 158);
+    height: calc(100% - 6px); 
+    width: calc(100% - 6px);
+    margin-right: 1rem;
+    z-index: 2;
+}
+
+#loading-filler{
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: calc(100% - 6px); 
+    width: calc(5% - 6px);
+    background-color:rgba(197,228,255,1);
+    border-radius: 0.5rem;
+    z-index: 1;
+    border: solid 3px rgba(158, 158, 158, 0);
+}
+
+#loading-hint{
+    margin-left: 1rem;
 }

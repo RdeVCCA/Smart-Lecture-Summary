@@ -34,7 +34,14 @@
                 <input id="audio" type="file" onchange="upload()">
             </div>
             <div class="upload-status">
-                <div class="loading-container"><div id="loading-bar"></div><span id="loading-hint">0</span><span>%</span></div>
+                <div class="loading-container">
+                    <div class="loading-parent">
+                        <div id="loading-bar"></div>
+                        <div id="loading-filler"></div>
+                    </div>
+                    <span id="loading-hint">0</span><span>%</span>
+                </div>
+                <div class="align-v"><span id="status">Ready to start.</span></div>
             </div>
         </div>
 
@@ -48,11 +55,12 @@
         <div class="division"></div>
 
         <div class="section download">
-            <button>Download</button>
+            <button onclick="download()">Download</button>
         </div>
     </section>
 
     <div class="background"></div>
+    <script src="{{ url_for('static', filename='js/loading-bar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/animations.js')}}"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
